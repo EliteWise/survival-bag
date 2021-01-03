@@ -7,14 +7,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.politicraft.bag.Main;
 import fr.politicraft.bag.model.PlayerBag;
 import fr.politicraft.bag.util.JsonField;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class JsonManager {
@@ -37,6 +40,9 @@ public class JsonManager {
     }
 
     public boolean itemExist(UUID playerUUID, String item) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         // Check value
         ObjectNode itemNode = (ObjectNode) root.get("items");
@@ -47,6 +53,9 @@ public class JsonManager {
     }
 
     public int getItemAmount(UUID playerUUID, String itemName) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         if(itemExist(playerUUID, itemName)) {
             JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
             JsonNode item = root.get("items").findValue(itemName);
@@ -58,7 +67,27 @@ public class JsonManager {
         return 0;
     }
 
+    public void addAllItems(UUID playerUUID, ItemStack[] items) throws IOException {
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+
+        // Update item
+        ObjectNode itemNode = (ObjectNode) root.get("items");
+        List<String> blacklistedItems = getBlacklistedItems(playerUUID);
+        for(ItemStack item : items) {
+            if(item != null && !blacklistedItems.contains(item.getType().name())) {
+                itemNode.put(String.valueOf(item.getType()), itemNode.path(String.valueOf(item.getType())).intValue() + item.getAmount());
+                Bukkit.getPlayer(playerUUID).getInventory().removeItem(item);
+            }
+        }
+
+        // Write new value into json file
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
     public void addItemAmount(UUID playerUUID, String itemName, int itemAmount) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         if (itemExist(playerUUID, itemName)) {
             // Update item
@@ -74,6 +103,9 @@ public class JsonManager {
     }
 
     public void removeItemAmount(UUID playerUUID, String itemName, int itemAmount) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         // Update item
         ObjectNode itemNode = (ObjectNode) root.get("items");
@@ -99,39 +131,51 @@ public class JsonManager {
             FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(file);
             fileConfiguration.save(file);
 
-            System.out.println("New Bag File: " + mainPath + playerUUID + ".json");
+            HashMap<String, Object> baseConfig = new HashMap<String, Object>() {{
+                put("hotbar", false);
+            }};
 
             // Our Model
-            PlayerBag playerBag = new PlayerBag(player.getName(), 0.0f, new HashMap<>(), new ArrayList<>());
+            PlayerBag playerBag = new PlayerBag(player.getName(), 0, new HashMap<>(), new ArrayList<>(), baseConfig);
             mapper.writeValue(new File(mainPath + playerUUID + ".json"), playerBag);
-
-            System.out.println(mapper.writeValueAsString(playerBag));
         }
     }
 
-    public float getExperience(UUID playerUUID) throws IOException {
+    public int getExperience(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         JsonNode item = root.get("experience");
 
         if(item != null) {
-            return item.floatValue();
+            return item.intValue();
         }
         return 0;
     }
 
     public void addExperience(UUID playerUUID, float exp) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         ((ObjectNode) root).put("experience", root.get("experience").intValue() + exp);
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 
-    public void removeExperience(UUID playerUUID, float exp) throws IOException {
+    public void removeExperience(UUID playerUUID, int exp) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         ((ObjectNode) root).put("experience", root.get("experience").intValue() - exp);
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 
     public boolean isBlacklisted(UUID playerUUID, String item) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         // Check value
         if(root.get("items").get(item) != null) {
@@ -141,6 +185,9 @@ public class JsonManager {
     }
 
     public boolean blacklistItemExist(UUID playerUUID, String itemName) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         // Check value
         ArrayNode arrayNode = (ArrayNode) root.get(JsonField.BLACKLIST);
@@ -152,7 +199,24 @@ public class JsonManager {
         return false;
     }
 
+    public List<String> getBlacklistedItems(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        // Check value
+        ArrayNode arrayNode = (ArrayNode) root.get(JsonField.BLACKLIST);
+        List<String> blacklistedItems = new ArrayList<>();
+        for(int i = arrayNode.size() - 1; i >= 0; i--) {
+            blacklistedItems.add(arrayNode.get(i).asText());
+        }
+        return blacklistedItems;
+    }
+
     public void updateBlacklistedItem(UUID playerUUID, String itemName) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         if(!blacklistItemExist(playerUUID, itemName)) {
             ArrayNode arrayNode = (ArrayNode) root.get(JsonField.BLACKLIST);
@@ -167,6 +231,17 @@ public class JsonManager {
             }
             ((ObjectNode) root).put(JsonField.BLACKLIST, arrayNode);
         }
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public boolean isHotbarEnabled(UUID playerUUID) throws IOException {
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        return root.get(JsonField.CONFIG).get(JsonField.HOTBAR).booleanValue();
+    }
+
+    public void updateHotbarConfig(UUID playerUUID) throws IOException {
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.HOTBAR, !isHotbarEnabled(playerUUID));
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 

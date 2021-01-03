@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class BagInventory {
 
@@ -16,6 +17,10 @@ public class BagInventory {
 
     private ArrayList<String> expDeposit = new ArrayList<>();
     private ArrayList<String> expWithdrawal = new ArrayList<>();
+
+    private HashMap<UUID, UUID> checkedPlayer = new HashMap<>();
+
+    private HashMap<String, ItemStack[]> summarySortedItems = new HashMap<>();
 
     public BagInventory() {
 
@@ -43,5 +48,13 @@ public class BagInventory {
 
     public ArrayList<String> getExpWithdrawal() {
         return expWithdrawal;
+    }
+
+    public HashMap<UUID, UUID> getCheckedPlayer() {
+        return checkedPlayer;
+    }
+
+    public HashMap<String, ItemStack[]> getSummarySortedItems() {
+        return summarySortedItems;
     }
 }

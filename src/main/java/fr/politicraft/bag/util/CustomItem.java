@@ -5,25 +5,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 public class CustomItem {
 
-    /*public ItemStack create(Material material, String itemName, String... desc) {
+    public ItemStack create(String itemName, Material material, List<String> desc) {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
         meta.setDisplayName(itemName);
-        ArrayList<String> lores = new ArrayList<>(Arrays.asList(desc));
-        meta.setLore(lores);
+        if(desc.stream().allMatch(elem -> elem != null && elem.length() > 0)) meta.setLore(desc);
         itemStack.setItemMeta(meta);
         return itemStack;
-    }*/
+    }
 
-    public ItemStack create(Material material, String... desc) {
+    public ItemStack create(Material material, List<String> desc) {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
-        ArrayList<String> lores = new ArrayList<>(Arrays.asList(desc));
-        meta.setLore(lores);
+        if(desc.stream().allMatch(elem -> elem != null && elem.length() > 0)) meta.setLore(desc);
         itemStack.setItemMeta(meta);
         return itemStack;
     }
@@ -40,7 +38,7 @@ public class CustomItem {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta meta = itemStack.getItemMeta();
         ArrayList<String> lores = new ArrayList<>();
-        lores.add("Total: §e" + amount);
+        lores.add(String.valueOf(amount));
         meta.setLore(lores);
         itemStack.setItemMeta(meta);
         return itemStack;

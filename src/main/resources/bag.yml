@@ -1,0 +1,56 @@
+# [!]
+inventory-menu-name: "Sac"
+# [!]
+inventory-deposit-withdrawal-name: "&eDepôt / Retrait"
+
+back-button-name: "&cRetour"
+# [!]
+back-button-item: RED_STAINED_GLASS_PANE
+
+back-button-slot: 0
+
+enable-frame-items: true
+# [!]
+frame-item: GRAY_STAINED_GLASS_PANE
+# [!]
+experience-item: EXPERIENCE_BOTTLE
+
+experience-item-name: "&eXP"
+
+experience-item-description:
+  - ""
+
+experience-item-slot: 4
+# [!]
+automatic-sort-item: ENDER_CHEST
+
+automatic-sort-item-name: "&eTrie Automatique"
+
+automatic-sort-item-description:
+  - "&7-----------"
+  - "&bHotbar: {symbol}"
+  - "&7-----------"
+  - "&aClic gauche: Exécuter."
+  - "&bClic droit: Hotbar uniquement."
+
+automatic-sort-item-slot: 49
+
+categories-description:
+  - ""
+
+items-description:
+  - "&7-----------"
+  - "&7Total: &e{amount}"
+  - "&7Blacklist: {symbol}"
+  - "&7-----------"
+  - "&aClic gauche: déposer/retirer l'item."
+  - "&cClic droit: ajouter/retirer de la blacklist."
+
+deposit-withdrawal-item-counter-description:
+  - "&e{amount}"
+
+deposit-withdrawal-item-counter-slot: 13
+
+deposit-item-slot: 11
+
+withdrawal-item-slot: 15
