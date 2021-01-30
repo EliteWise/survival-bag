@@ -51,91 +51,78 @@ public class InventoryClick implements Listener {
 
         FileConfiguration configCat = YamlConfiguration.loadConfiguration(new File(main.mainPath, YmlFile.CATEGORIES));
         String title = e.getView().getTitle();
-        switch (title) {
-            case "Sac":
-                e.setCancelled(true);
-                switch (item.getType()) {
-                    case EXPERIENCE_BOTTLE:
-                        inventoryManager.experience(player, item);
-                        inventoryManager.amountInventory(player, jsonManager, item, true);
-                        break;
-                    case GRAY_STAINED_GLASS_PANE:
-                        break;
-                    case ENDER_CHEST:
-                        if(isRightClick) {
-                            jsonManager.updateHotbarConfig(player.getUniqueId());
-                            String symbol = (jsonManager.isHotbarEnabled(player.getUniqueId()) ? "§a✔" : "§c❌");
-                            e.getClickedInventory().setItem(e.getSlot(), customItem.create("§eTrie Automatique", Material.ENDER_CHEST,
-                                    main.getYmlBag().getAutomaticSortDescription(symbol)));
-                        } else if(isLeftClick) {
-                            inventoryManager.sort(player, jsonManager);
-                        }
-                        break;
-                    default:
-                        inventoryManager.itemsInventory(player, configCat, ymlMsg, item);
-                        break;
+
+        if(title.equalsIgnoreCase(main.getYmlBag().getInventoryMenuName())) {
+            e.setCancelled(true);
+            if(item.getType() == main.getYmlBag().getExperienceItem()) {
+                inventoryManager.experience(player, item);
+                inventoryManager.amountInventory(player, jsonManager, item, true);
+            } else if(item.getType() == main.getYmlBag().getFrameItem()) {
+
+            } else if(item.getType() == main.getYmlBag().getAutomaticSortItem()) {
+                if(isRightClick) {
+                    jsonManager.updateHotbarConfig(player.getUniqueId());
+                    String symbol = (jsonManager.isHotbarEnabled(player.getUniqueId()) ? "§a✔" : "§c❌");
+                    e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(),
+                            main.getYmlBag().getAutomaticSortDescription(symbol)));
+                } else if(isLeftClick) {
+                    inventoryManager.sort(player, jsonManager);
                 }
-                break;
-            case "Depôt / Retrait":
-                if(item.getType() == Material.RED_STAINED_GLASS_PANE) inventoryManager.backToPreviousInventory(player, "Category", configCat, ymlMsg, customItem.create(main.getBagInventory().getPreviousClickedItem().get(player).getType(), main.getBagInventory().getCategoryInventoryName().get(player)));
+            } else {
+                inventoryManager.itemsInventory(player, configCat, ymlMsg, item);
+            }
+        } else if(title.equalsIgnoreCase(main.getYmlBag().getInventoryDepositWithdrawalName())) {
+            if(item.getType() == main.getYmlBag().getBackButtonItem()) inventoryManager.backToPreviousInventory(player, "Category", configCat, ymlMsg, customItem.create(main.getBagInventory().getPreviousClickedItem().get(player).getType(), main.getBagInventory().getCategoryInventoryName().get(player)));
 
-                String itemName = item.getItemMeta().getDisplayName();
-                e.setCancelled(true);
-                player.updateInventory();
-                switch (itemName) {
-                    case "§eDepôt":
-                        inventoryManager.goldInteraction(player, main.getBagInventory().getDeposit(), ymlMsg.getPrefixMessage() + ymlMsg.getDepositRequestMessage());
-                        break;
+            String itemName = item.getItemMeta().getDisplayName();
+            e.setCancelled(true);
+            player.updateInventory();
 
-                    case "§eRetrait":
-                        inventoryManager.goldInteraction(player, main.getBagInventory().getWithdrawal(), ymlMsg.getPrefixMessage() + ymlMsg.getWithdrawalRequestMessage());
-                        break;
-                }
-                break;
-                // Experience inventory
-            case "§eDepôt / Retrait":
-                if(item.getType() == Material.RED_STAINED_GLASS_PANE) inventoryManager.backToPreviousInventory(player, "Sac", null, null, null);
+            if(itemName.equalsIgnoreCase(main.getYmlBag().getDepositItemName())) {
+                inventoryManager.goldInteraction(player, main.getBagInventory().getDeposit(), ymlMsg.getPrefixMessage() + ymlMsg.getDepositRequestMessage());
+            } else if(itemName.equalsIgnoreCase(main.getYmlBag().getWithdrawalItemName())) {
+                inventoryManager.goldInteraction(player, main.getBagInventory().getWithdrawal(), ymlMsg.getPrefixMessage() + ymlMsg.getWithdrawalRequestMessage());
+            }
 
-                String itemName_ = item.getItemMeta().getDisplayName();
-                e.setCancelled(true);
-                player.updateInventory();
-                switch (itemName_) {
-                    case "§eDepôt":
-                        inventoryManager.goldInteraction(player, main.getBagInventory().getExpDeposit(), ymlMsg.getPrefixMessage() + ymlMsg.getExpDepositRequestMessage());
-                        break;
+            // Experience inventory
+        } else if(title.equalsIgnoreCase(main.getYmlBag().getInventoryExperienceName())) {
+            if(item.getType() == Material.RED_STAINED_GLASS_PANE) inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
 
-                    case "§eRetrait":
-                        inventoryManager.goldInteraction(player, main.getBagInventory().getExpWithdrawal(), ymlMsg.getPrefixMessage() + ymlMsg.getExpWithdrawalRequestMessage());
-                        break;
-                }
-                break;
-            case "Trie Récap":
-            case "Blacklist":
-                e.setCancelled(true);
-                break;
+            String itemName_ = item.getItemMeta().getDisplayName();
+            e.setCancelled(true);
+            player.updateInventory();
+
+            if(itemName_.equalsIgnoreCase(main.getYmlBag().getDepositItemName())) {
+                inventoryManager.goldInteraction(player, main.getBagInventory().getExpDeposit(), ymlMsg.getPrefixMessage() + ymlMsg.getExpDepositRequestMessage());
+            } else if(itemName_.equalsIgnoreCase(main.getYmlBag().getWithdrawalItemName())) {
+                inventoryManager.goldInteraction(player, main.getBagInventory().getExpWithdrawal(), ymlMsg.getPrefixMessage() + ymlMsg.getExpWithdrawalRequestMessage());
+            }
+
+        } else if(title.equalsIgnoreCase("Trie Récap")) {
+
+        } else if(title.equalsIgnoreCase("Blacklist")) {
+            e.setCancelled(true);
         }
+
         // Items Inventory
         if(title.equalsIgnoreCase(main.getBagInventory().getCategoryInventoryName().get(player))) {
-            switch (item.getType()) {
-                case RED_STAINED_GLASS_PANE:
-                    inventoryManager.backToPreviousInventory(player, "Sac", null, null, null);
-                    break;
-                default:
-                    JsonManager jsonManager = new JsonManager(main);
-                    if(isLeftClick) {
-                        inventoryManager.amountInventory(player, jsonManager, item, false);
-                    } else if(isRightClick) {
-                        jsonManager.updateBlacklistedItem(player.getUniqueId(), item.getType().name());
+            if (item.getType() == main.getYmlBag().getBackButtonItem()) {
+                inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
+            } else {
+                JsonManager jsonManager = new JsonManager(main);
+                if(isLeftClick) {
+                    inventoryManager.amountInventory(player, jsonManager, item, false);
+                } else if(isRightClick) {
+                    jsonManager.updateBlacklistedItem(player.getUniqueId(), item.getType().name());
 
-                        boolean isBlacklisted = jsonManager.blacklistItemExist(player.getUniqueId(), item.getType().toString());
-                        String symbol = (isBlacklisted ? "§a✔" : "§c❌");
-                        int amount = jsonManager.getItemAmount(player.getUniqueId(), item.getType().name());
+                    boolean isBlacklisted = jsonManager.blacklistItemExist(player.getUniqueId(), item.getType().toString());
+                    String symbol = (isBlacklisted ? "§a✔" : "§c❌");
+                    int amount = jsonManager.getItemAmount(player.getUniqueId(), item.getType().name());
 
-                        e.getClickedInventory().setItem(e.getSlot(), customItem.create(
-                                Material.valueOf(item.getType().toString()),
-                                main.getYmlBag().getItemsDescription(amount, symbol)));
-                    }
-                    break;
+                    e.getClickedInventory().setItem(e.getSlot(), customItem.create(
+                            Material.valueOf(item.getType().toString()),
+                            main.getYmlBag().getItemsDescription(amount, symbol)));
+                }
             }
             e.setCancelled(true);
         }

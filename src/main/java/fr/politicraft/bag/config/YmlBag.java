@@ -31,6 +31,10 @@ public class YmlBag {
         return TextAdapter.colorize(config.getString("inventory-deposit-withdrawal-name"));
     }
 
+    public String getInventoryExperienceName() {
+        return TextAdapter.colorize(config.getString("inventory-experience-name"));
+    }
+
     public String getBackButtonName() {
         return TextAdapter.colorize(config.getString("back-button-name"));
     }
@@ -89,6 +93,22 @@ public class YmlBag {
 
     public List<String> getItemsDescription(int amount, String symbol) {
         return config.getStringList("items-description").stream().map(elem -> TextAdapter.replaceSection(elem, amount, symbol)).map(TextAdapter::colorize).collect(Collectors.toList());
+    }
+
+    public Material getDepositItem() {
+        return Material.valueOf(config.getString("deposit-item"));
+    }
+
+    public String getDepositItemName() {
+        return TextAdapter.colorize(config.getString("deposit-item-name"));
+    }
+
+    public Material getWithdrawalItem() {
+        return Material.valueOf(config.getString("withdrawal-item"));
+    }
+
+    public String getWithdrawalItemName() {
+        return TextAdapter.colorize(config.getString("withdrawal-item-name"));
     }
 
     public List<String> getDepositWithdrawalItemCounterDescription(int amount) {

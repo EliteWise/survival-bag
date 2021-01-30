@@ -44,7 +44,7 @@ public class Bag implements CommandExecutor {
     }
 
     public void bagInventory(Player player) {
-        Inventory bag = Bukkit.createInventory(null, 54, "Sac");
+        Inventory bag = Bukkit.createInventory(null, 54, main.getYmlBag().getInventoryMenuName());
 
         config.getConfigurationSection("Bag").getKeys(false).forEach(category -> {
 

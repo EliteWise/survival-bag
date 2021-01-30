@@ -90,7 +90,7 @@ public class InventoryManager {
 
     public void amountInventory(Player player, JsonManager jsonManager, ItemStack currentItem, boolean exp) throws IOException {
         main.getBagInventory().getPreviousClickedItem().put(player, currentItem);
-        Inventory deposit_withdrawal = Bukkit.createInventory(player, 27, exp ? "§eDepôt / Retrait" : "Depôt / Retrait");
+        Inventory deposit_withdrawal = Bukkit.createInventory(player, 27, exp ? main.getYmlBag().getInventoryExperienceName() : main.getYmlBag().getInventoryDepositWithdrawalName());
         CustomItem customItem = new CustomItem();
 
         Material itemType = main.getBagInventory().getPreviousClickedItem().get(player).getType();
@@ -98,21 +98,18 @@ public class InventoryManager {
         if(main.getYmlBag().isFrameItemsEnabled()) inventoryUX.fillGlassPane(deposit_withdrawal, 18);
         inventoryUX.backGlassPane(deposit_withdrawal);
 
-        deposit_withdrawal.setItem(main.getYmlBag().getDepositItemSlot(), customItem.create(Material.GOLD_INGOT, "§eDepôt"));
+        deposit_withdrawal.setItem(main.getYmlBag().getDepositItemSlot(), customItem.create(main.getYmlBag().getDepositItem(), main.getYmlBag().getDepositItemName()));
         deposit_withdrawal.setItem(main.getYmlBag().getDepositWithdrawalItemCounterSlot(), customItem.create(itemType, (exp ? main.getYmlBag().getDepositWithdrawalItemCounterDescription(jsonManager.getExperience(player.getUniqueId())) :  main.getYmlBag().getDepositWithdrawalItemCounterDescription(jsonManager.getItemAmount(player.getUniqueId(), itemType.name())))));
-        deposit_withdrawal.setItem(main.getYmlBag().getWithdrawalItemSlot(), customItem.create(Material.GOLD_INGOT, "§eRetrait"));
+        deposit_withdrawal.setItem(main.getYmlBag().getWithdrawalItemSlot(), customItem.create(main.getYmlBag().getWithdrawalItem(), main.getYmlBag().getWithdrawalItemName()));
 
         player.openInventory(deposit_withdrawal);
     }
 
     public void backToPreviousInventory(Player player, String previousInv, FileConfiguration configCat, YmlMessage ymlMsg, ItemStack item) {
-        switch (previousInv) {
-            case "Sac":
-                player.performCommand("sac");
-                break;
-            case "Category":
-                itemsInventory(player, configCat, ymlMsg, item);
-                break;
+        if(previousInv.equalsIgnoreCase(main.getYmlBag().getInventoryMenuName())) {
+            player.performCommand("sac");
+        } else if(previousInv.equalsIgnoreCase("Category")) {
+            itemsInventory(player, configCat, ymlMsg, item);
         }
     }
 

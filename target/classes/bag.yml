@@ -1,18 +1,20 @@
-# [!]
+
 inventory-menu-name: "Sac"
-# [!]
-inventory-deposit-withdrawal-name: "&eDepôt / Retrait"
+
+inventory-deposit-withdrawal-name: "Depôt / Retrait"
+
+inventory-experience-name: "&eDepôt / Retrait"
 
 back-button-name: "&cRetour"
-# [!]
+
 back-button-item: RED_STAINED_GLASS_PANE
 
 back-button-slot: 0
 
 enable-frame-items: true
-# [!]
+
 frame-item: GRAY_STAINED_GLASS_PANE
-# [!]
+
 experience-item: EXPERIENCE_BOTTLE
 
 experience-item-name: "&eXP"
@@ -21,7 +23,7 @@ experience-item-description:
   - ""
 
 experience-item-slot: 4
-# [!]
+
 automatic-sort-item: ENDER_CHEST
 
 automatic-sort-item-name: "&eTrie Automatique"
@@ -45,6 +47,16 @@ items-description:
   - "&7-----------"
   - "&aClic gauche: déposer/retirer l'item."
   - "&cClic droit: ajouter/retirer de la blacklist."
+
+# Inventaire - Dépôt / Retrait #
+
+deposit-item: GOLD_INGOT
+
+deposit-item-name: "&eDepôt"
+
+withdrawal-item: GOLD_INGOT
+
+withdrawal-item-name: "&eRetrait"
 
 deposit-withdrawal-item-counter-description:
   - "&e{amount}"
