@@ -52,7 +52,7 @@ public class Bag implements CommandExecutor {
 
             bag.setItem(main.getYmlBag().getExperienceItemSlot(), customItem.create(main.getYmlBag().getExperienceItemName(), main.getYmlBag().getExperienceItem(), main.getYmlBag().getExperienceItemDescription()));
             try {
-                String symbol = (jsonManager.isHotbarEnabled(player.getUniqueId()) ? "§a✔" : "§c❌");
+                String symbol = jsonManager.getSortConfig(player.getUniqueId());
                 bag.setItem(main.getYmlBag().getAutomaticSortItemSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(), main.getYmlBag().getAutomaticSortDescription(symbol)));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -125,11 +125,23 @@ public class Bag implements CommandExecutor {
                     }
                     player.openInventory(blacklistInventory);
                     break;
+                case "reload":
+                    if(player.isOp()) {
+                        try {
+                            main.setupConfig();
+                        } catch (Exception e) {
+                            player.sendMessage("§cLe reload de la configuration a échoué. ❌");
+                        }
+                    }
                 default:
+                    if(args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("trier") ||
+                    args[0].equalsIgnoreCase("recap") || args[0].equalsIgnoreCase("blacklist") ||
+                    args[0].equalsIgnoreCase("reload")) return false;
+
                     String playerName = args[0];
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
 
-                    if(main.getYmlPerm().hasBagViewer(player.getUniqueId())) {
+                    if(main.getYmlPerm().hasBagViewer(player.getUniqueId()) || player.isOp()) {
                         if(offlinePlayer.hasPlayedBefore()) {
                             main.getBagInventory().getCheckedPlayer().put(player.getUniqueId(), offlinePlayer.getUniqueId()); // Player who check | Player checked
                             bagInventory(player);

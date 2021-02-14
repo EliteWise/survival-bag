@@ -115,16 +115,28 @@ public class InventoryManager {
 
     public void sort(Player player, JsonManager jsonManager) throws IOException {
 
+        ItemStack[] playerInv = player.getInventory().getStorageContents();
         ItemStack[] hotbar = IntStream.range(0, 9).boxed().map(player.getInventory()::getItem).toArray(ItemStack[]::new);
-        ItemStack[] playerInv = jsonManager.isHotbarEnabled(player.getUniqueId()) ? hotbar : player.getInventory().getStorageContents();
+        ItemStack[] exceptHotbar = IntStream.range(9, 36).boxed().map(player.getInventory()::getItem).toArray(ItemStack[]::new);
 
         try {
-            jsonManager.addAllItems(player.getUniqueId(), playerInv);
+            switch (jsonManager.getSortConfig(player.getUniqueId())) {
+                case "all":
+                    jsonManager.addAllItems(player.getUniqueId(), playerInv);
+                    main.getBagInventory().getSummarySortedItems().put(player.getName(), playerInv);
+                    break;
+                case "hotbar-only":
+                    jsonManager.addAllItems(player.getUniqueId(), hotbar);
+                    main.getBagInventory().getSummarySortedItems().put(player.getName(), hotbar);
+                    break;
+                case "all-except-hotbar":
+                    jsonManager.addAllItems(player.getUniqueId(), exceptHotbar);
+                    main.getBagInventory().getSummarySortedItems().put(player.getName(), exceptHotbar);
+                    break;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        main.getBagInventory().getSummarySortedItems().put(player.getName(), playerInv);
 
         BaseComponent[] hoverInv = new ComponentBuilder(main.getYmlMsg().getSortSummaryHoverMessage()).create();
         HoverEvent hoverEventInv = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverInv);

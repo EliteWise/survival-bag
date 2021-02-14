@@ -25,7 +25,7 @@ public final class Main extends JavaPlugin {
     private YmlBag ymlBag;
 
     public String mainPath = getDataFolder() + "/";
-    private List<String> ressources = Arrays.asList(YmlFile.BAG, YmlFile.CATEGORIES, YmlFile.MESSAGES, YmlFile.PERMISSIONS);
+    public List<String> ressources = Arrays.asList(YmlFile.BAG, YmlFile.CATEGORIES, YmlFile.MESSAGES, YmlFile.PERMISSIONS);
 
     @Override
     public void onEnable() {
@@ -37,9 +37,7 @@ public final class Main extends JavaPlugin {
             saveResource(r, false);
         });
 
-        ymlMessage = new YmlMessage(this);
-        ymlPerm = new YmlPermission(this);
-        ymlBag = new YmlBag(this);
+        setupConfig();
 
         getCommand("sac").setExecutor(new Bag(this));
 
@@ -51,6 +49,12 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+    }
+
+    public void setupConfig() {
+        ymlMessage = new YmlMessage(this);
+        ymlPerm = new YmlPermission(this);
+        ymlBag = new YmlBag(this);
     }
 
     public BagInventory getBagInventory() {

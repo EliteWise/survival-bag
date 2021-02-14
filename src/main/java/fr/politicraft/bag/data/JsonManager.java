@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.politicraft.bag.Main;
 import fr.politicraft.bag.model.PlayerBag;
 import fr.politicraft.bag.util.JsonField;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -132,7 +133,7 @@ public class JsonManager {
             fileConfiguration.save(file);
 
             HashMap<String, Object> baseConfig = new HashMap<String, Object>() {{
-                put("hotbar", false);
+                put("sort", "all");
             }};
 
             // Our Model
@@ -234,14 +235,20 @@ public class JsonManager {
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 
-    public boolean isHotbarEnabled(UUID playerUUID) throws IOException {
+    public String getSortConfig(UUID playerUUID) throws IOException {
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
-        return root.get(JsonField.CONFIG).get(JsonField.HOTBAR).booleanValue();
+        return root.get(JsonField.CONFIG).get(JsonField.CONFIG_SORT).textValue();
     }
 
-    public void updateHotbarConfig(UUID playerUUID) throws IOException {
+    private String[] modes = new String[] {"all", "hotbar-only", "all-except-hotbar"};
+
+    public void updateSortConfig(UUID playerUUID) throws IOException {
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
-        ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.HOTBAR, !isHotbarEnabled(playerUUID));
+        int indexMode = ArrayUtils.indexOf(modes, getSortConfig(playerUUID));
+        int limit = 2;
+        int nexIndexMode = (indexMode == limit ? indexMode - limit : indexMode + 1);
+
+        ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.CONFIG_SORT, modes[nexIndexMode]);
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 

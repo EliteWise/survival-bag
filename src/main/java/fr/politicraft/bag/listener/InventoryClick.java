@@ -61,8 +61,8 @@ public class InventoryClick implements Listener {
 
             } else if(item.getType() == main.getYmlBag().getAutomaticSortItem()) {
                 if(isRightClick) {
-                    jsonManager.updateHotbarConfig(player.getUniqueId());
-                    String symbol = (jsonManager.isHotbarEnabled(player.getUniqueId()) ? "§a✔" : "§c❌");
+                    jsonManager.updateSortConfig(player.getUniqueId());
+                    String symbol = jsonManager.getSortConfig(player.getUniqueId());
                     e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(),
                             main.getYmlBag().getAutomaticSortDescription(symbol)));
                 } else if(isLeftClick) {
@@ -86,7 +86,7 @@ public class InventoryClick implements Listener {
 
             // Experience inventory
         } else if(title.equalsIgnoreCase(main.getYmlBag().getInventoryExperienceName())) {
-            if(item.getType() == Material.RED_STAINED_GLASS_PANE) inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
+            if(item.getType() == main.getYmlBag().getBackButtonItem()) inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
 
             String itemName_ = item.getItemMeta().getDisplayName();
             e.setCancelled(true);
