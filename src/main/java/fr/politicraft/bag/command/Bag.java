@@ -18,6 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,15 @@ public class Bag implements CommandExecutor {
 
             if(main.getYmlBag().isFrameItemsEnabled()) inventoryUX.fillGlassPane(bag, 45);
 
+            try {
+                String symbol = main.getYmlBag().getShowOwnedItemsSymbol(jsonManager.getItemsOwnedVisibilityConfig(player.getUniqueId()));
+                bag.setItem(main.getYmlBag().getShowOwnedItemsItemSlot(),  customItem.create(main.getYmlBag().getShowOwnedItemsItemName(), main.getYmlBag().getShowOwnedItemsItem(), main.getYmlBag().getShowOwnedItemsItemDescription(symbol)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             bag.setItem(main.getYmlBag().getExperienceItemSlot(), customItem.create(main.getYmlBag().getExperienceItemName(), main.getYmlBag().getExperienceItem(), main.getYmlBag().getExperienceItemDescription()));
+            bag.setItem(main.getYmlBag().getSpecialItemSlot(), customItem.create(main.getYmlBag().getSpecialItemName(), main.getYmlBag().getSpecialItem(), main.getYmlBag().getSpecialItemDescription()));
             try {
                 String symbol = jsonManager.getSortConfig(player.getUniqueId());
                 bag.setItem(main.getYmlBag().getAutomaticSortItemSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(), main.getYmlBag().getAutomaticSortDescription(symbol)));
@@ -75,8 +84,14 @@ public class Bag implements CommandExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if(args.length == 0) {
+
+            if(player.isPermissionSet("889")) Bukkit.broadcastMessage("§cJ'ai la perm");
+
+            for(PermissionAttachmentInfo test : player.getEffectivePermissions()) {
+                    Bukkit.broadcastMessage(test.getPermission());
+            }
+
             bagInventory(player);
         } else if(args.length == 1) {
             switch (args[0]) {
@@ -129,6 +144,7 @@ public class Bag implements CommandExecutor {
                     if(player.isOp()) {
                         try {
                             main.setupConfig();
+                            player.sendMessage("§aLe reload de la configuration a été effectué avec succès. ✔");
                         } catch (Exception e) {
                             player.sendMessage("§cLe reload de la configuration a échoué. ❌");
                         }

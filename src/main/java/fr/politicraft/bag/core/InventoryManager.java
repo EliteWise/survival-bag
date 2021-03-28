@@ -12,14 +12,18 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class InventoryManager {
@@ -53,19 +57,41 @@ public class InventoryManager {
 
             inventoryUX.backGlassPane(category);
 
-            for(Object categoryItem : categoryItems) {
-                try {
-                    boolean isBlacklisted = jsonManager.blacklistItemExist(player.getUniqueId(), categoryItem.toString().toUpperCase());
-                    String symbol = (isBlacklisted ? "§a✔" : "§c❌");
-                    int amount = jsonManager.getItemAmount(player.getUniqueId(), categoryItem.toString().toUpperCase());
+            try {
+                if(!jsonManager.getItemsOwnedVisibilityConfig(player.getUniqueId())) {
+                    for(Object categoryItem : categoryItems) {
+                        try {
+                            boolean isBlacklisted = jsonManager.blacklistItemExist(player.getUniqueId(), categoryItem.toString().toUpperCase());
+                            String symbol = (isBlacklisted ? "§a✔" : "§c❌");
+                            int amount = jsonManager.getItemAmount(player.getUniqueId(), categoryItem.toString().toUpperCase());
 
-                    category.setItem(9 + i.getAndIncrement(), customItem.create(
-                            Material.valueOf(categoryItem.toString().toUpperCase()),
-                            main.getYmlBag().getItemsDescription(amount, symbol)));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                            category.setItem(9 + i.getAndIncrement(), customItem.create(
+                                    Material.valueOf(categoryItem.toString().toUpperCase()),
+                                    main.getYmlBag().getItemsDescription(amount, symbol)));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    // Show only items owned
+                    for(Object categoryItem : categoryItems) {
+                        try {
+                            boolean isBlacklisted = jsonManager.blacklistItemExist(player.getUniqueId(), categoryItem.toString().toUpperCase());
+                            String symbol = (isBlacklisted ? "§a✔" : "§c❌");
+                            int amount = jsonManager.getItemAmount(player.getUniqueId(), categoryItem.toString().toUpperCase());
+
+                            if(jsonManager.getItemsOwned(player.getUniqueId()).contains(categoryItem.toString().toUpperCase())) {
+                                category.setItem(9 + i.getAndIncrement(), customItem.create(
+                                        Material.valueOf(categoryItem.toString().toUpperCase()),
+                                        main.getYmlBag().getItemsDescription(amount, symbol)));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         player.openInventory(category);
@@ -110,10 +136,37 @@ public class InventoryManager {
             player.performCommand("sac");
         } else if(previousInv.equalsIgnoreCase("Category")) {
             itemsInventory(player, configCat, ymlMsg, item);
+        } else {
+            player.performCommand("sac");
         }
     }
 
+    public List<ItemStack> getSortSpecialItems(ItemStack[] items) {
+        return Arrays.stream(items).filter(item -> (item != null) && (item.getType() == Material.ENCHANTED_BOOK || EnchantmentTarget.TOOL.includes(item)
+                || EnchantmentTarget.WEAPON.includes(item) || EnchantmentTarget.ARMOR.includes(item)
+                || item.getType().toString().contains("SHULKER") || item.getType() == Material.POTION
+                || item.getType() == Material.SPLASH_POTION)).collect(Collectors.toList());
+    }
+
+    public void filterSortSpecialItems(UUID playerUUID, ItemStack[] items) {
+        JsonManager jsonManager = new JsonManager(main);
+
+        getSortSpecialItems(items).forEach((item) -> {
+            try {
+                jsonManager.addSpecialItem(playerUUID, item);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public ItemStack[] substractItemsArray(ItemStack[] basicItems) {
+        return Arrays.stream(basicItems).filter(item -> !getSortSpecialItems(basicItems).contains(item)).toArray(ItemStack[]::new);
+    }
+
     public void sort(Player player, JsonManager jsonManager) throws IOException {
+
+        UUID playerUUID = player.getUniqueId();
 
         ItemStack[] playerInv = player.getInventory().getStorageContents();
         ItemStack[] hotbar = IntStream.range(0, 9).boxed().map(player.getInventory()::getItem).toArray(ItemStack[]::new);
@@ -122,15 +175,18 @@ public class InventoryManager {
         try {
             switch (jsonManager.getSortConfig(player.getUniqueId())) {
                 case "all":
-                    jsonManager.addAllItems(player.getUniqueId(), playerInv);
+                    filterSortSpecialItems(playerUUID, playerInv);
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(playerInv));
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), playerInv);
                     break;
                 case "hotbar-only":
-                    jsonManager.addAllItems(player.getUniqueId(), hotbar);
+                    filterSortSpecialItems(playerUUID, hotbar);
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(hotbar));
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), hotbar);
                     break;
                 case "all-except-hotbar":
-                    jsonManager.addAllItems(player.getUniqueId(), exceptHotbar);
+                    filterSortSpecialItems(playerUUID, exceptHotbar);
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(exceptHotbar));
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), exceptHotbar);
                     break;
             }
@@ -145,6 +201,12 @@ public class InventoryManager {
         player.spigot().sendMessage(message);
     }
 
+    public void specialInventory(Player player) throws IOException {
+        Inventory specialInv = Bukkit.createInventory(player, 54, main.getYmlBag().getSpecialInventoryName());
 
+        // Display special items
+        JsonManager jsonManager = new JsonManager(main);
+        player.openInventory(jsonManager.loadSpecialInventory(player.getUniqueId(), specialInv));
+    }
 
 }

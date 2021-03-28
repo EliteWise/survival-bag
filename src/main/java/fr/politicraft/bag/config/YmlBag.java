@@ -79,6 +79,8 @@ public class YmlBag {
         return TextAdapter.colorize(config.getString("automatic-sort-item-name"));
     }
 
+    public String getAutomaticSortOption(String option) { return TextAdapter.colorize(config.getString("automatic-sort-option." + option)); }
+
     public List<String> getAutomaticSortDescription(String symbol) {
         return config.getStringList("automatic-sort-item-description").stream().map(elem -> TextAdapter.replaceSection(elem, 0, symbol)).map(TextAdapter::colorize).collect(Collectors.toList());
     }
@@ -126,4 +128,27 @@ public class YmlBag {
     public int getWithdrawalItemSlot() {
         return config.getInt("withdrawal-item-slot");
     }
+
+    public Material getSpecialItem() { return Material.valueOf(config.getString("special-inventory-item")); }
+
+    public int getSpecialItemSlot() { return config.getInt("special-inventory-item-slot"); }
+
+    public String getSpecialItemName() { return TextAdapter.colorize(config.getString("special-inventory-item-name")); }
+
+    public List<String> getSpecialItemDescription() { return config.getStringList("special-inventory-item-description").stream().map(TextAdapter::colorize).collect(Collectors.toList()); }
+
+    public String getSpecialInventoryName() { return TextAdapter.colorize(config.getString("special-inventory-name")); }
+
+    public String getShowOwnedItemsItemName() { return TextAdapter.colorize(config.getString("show-owned-items-item-name")); }
+
+    public String getShowOwnedItemsSymbol(boolean bool) { return TextAdapter.colorize(config.getString("show-owned-items-symbol." + bool)); }
+
+    public List<String> getShowOwnedItemsItemDescription(String symbol) {
+        return config.getStringList("show-owned-items-item-description").stream().map(elem -> TextAdapter.replaceSection(elem, 0, symbol)).map(TextAdapter::colorize).collect(Collectors.toList());
+    }
+
+    public int getShowOwnedItemsItemSlot() { return config.getInt("show-owned-items-item-slot"); }
+
+    public Material getShowOwnedItemsItem() { return Material.valueOf(config.getString("show-owned-items-item")); }
+
 }

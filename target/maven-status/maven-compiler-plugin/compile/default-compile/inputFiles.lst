@@ -2,6 +2,7 @@ C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politic
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\command\Bag.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\util\TextAdapter.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\listener\InventoryClick.java
+C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\data\InventorySerializer.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\listener\ChatAmount.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\listener\PlayerJoin.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\util\CustomItem.java
@@ -10,6 +11,7 @@ C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politic
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\core\InventoryManager.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\data\JsonManager.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\util\InventoryUX.java
+C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\listener\InventoryClose.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\model\PlayerBag.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\config\YmlBag.java
 C:\Users\Elite\Desktop\- Odyssia -\EliteDev\SurvivalBag\src\main\java\fr\politicraft\bag\config\YmlMessage.java

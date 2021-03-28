@@ -6,20 +6,19 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.politicraft.bag.Main;
 import fr.politicraft.bag.model.PlayerBag;
+import fr.politicraft.bag.util.InventoryUX;
 import fr.politicraft.bag.util.JsonField;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class JsonManager {
 
@@ -134,10 +133,16 @@ public class JsonManager {
 
             HashMap<String, Object> baseConfig = new HashMap<String, Object>() {{
                 put("sort", "all");
+                put("owned-items-visibility", false);
             }};
 
+            Inventory specialInv = Bukkit.createInventory(null, 54);
+
+            InventoryUX inventoryUX = new InventoryUX(main);
+            inventoryUX.backGlassPane(specialInv);
+
             // Our Model
-            PlayerBag playerBag = new PlayerBag(player.getName(), 0, new HashMap<>(), new ArrayList<>(), baseConfig);
+            PlayerBag playerBag = new PlayerBag(player.getName(), 0, new HashMap<>(), InventorySerializer.inventoryToBase64(specialInv), new ArrayList<>(), baseConfig);
             mapper.writeValue(new File(mainPath + playerUUID + ".json"), playerBag);
         }
     }
@@ -249,6 +254,97 @@ public class JsonManager {
         int nexIndexMode = (indexMode == limit ? indexMode - limit : indexMode + 1);
 
         ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.CONFIG_SORT, modes[nexIndexMode]);
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public String getSpecialInventory(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        JsonNode inv = root.get("specialItems");
+
+        if(inv != null) {
+            return inv.textValue();
+        }
+        return InventorySerializer.inventoryToBase64(Bukkit.createInventory(null, 64));
+    }
+
+    public Inventory loadSpecialInventory(UUID playerUUID, Inventory inventory) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        JsonNode inv = root.get("specialItems");
+
+        if(inv != null) {
+            inventory.setContents(InventorySerializer.itemStackArrayFromBase64(inv.textValue()));
+            return inventory;
+        }
+        return inventory;
+    }
+
+    public void saveSpecialInventory(UUID playerUUID, Inventory inventory) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        ((ObjectNode) root).put("specialItems", InventorySerializer.inventoryToBase64(inventory));
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public void addSpecialItem(UUID playerUUID, ItemStack itemStack) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        ItemStack[] items = InventorySerializer.itemStackArrayFromBase64(getSpecialInventory(playerUUID));
+        Inventory specialInv = Bukkit.createInventory(null, 54);
+        specialInv.setContents(items);
+        specialInv.addItem(itemStack);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        ((ObjectNode) root).put("specialItems", InventorySerializer.inventoryToBase64(specialInv));
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public void removeSpecialItem(UUID playerUUID, ItemStack itemStack) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        ItemStack[] items = InventorySerializer.itemStackArrayFromBase64(getSpecialInventory(playerUUID));
+        Inventory specialInv = Bukkit.createInventory(null, 54);
+        specialInv.setContents(items);
+        specialInv.removeItem(itemStack);
+
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        ((ObjectNode) root).put("specialItems", InventorySerializer.inventoryToBase64(specialInv));
+        mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public List<String> getItemsOwned(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode jsonNode = mapper.readTree(new File(mainPath + playerUUID + ".json")).get("items");
+        Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+        List<String> items = new ArrayList<>();
+
+        while(fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            items.add(field.getKey());
+        }
+        return items;
+    }
+
+    public boolean getItemsOwnedVisibilityConfig(UUID playerUUID) throws IOException {
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+        return root.get(JsonField.CONFIG).get(JsonField.CONFIG_OWNED_ITEMS_VISIBILITY).booleanValue();
+    }
+
+    public void updateItemsVisibilityConfig(UUID playerUUID) throws IOException {
+        JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
+
+        ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.CONFIG_OWNED_ITEMS_VISIBILITY, !getItemsOwnedVisibilityConfig(playerUUID));
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
 

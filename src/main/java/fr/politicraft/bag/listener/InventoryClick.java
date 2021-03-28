@@ -59,10 +59,17 @@ public class InventoryClick implements Listener {
                 inventoryManager.amountInventory(player, jsonManager, item, true);
             } else if(item.getType() == main.getYmlBag().getFrameItem()) {
 
+            } else if(item.getType() == main.getYmlBag().getSpecialItem()) {
+                inventoryManager.specialInventory(player);
+            } else if(item.getType() == main.getYmlBag().getShowOwnedItemsItem()) {
+                jsonManager.updateItemsVisibilityConfig(player.getUniqueId());
+                String symbol = main.getYmlBag().getShowOwnedItemsSymbol(jsonManager.getItemsOwnedVisibilityConfig(player.getUniqueId()));
+                e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getShowOwnedItemsItemName(), main.getYmlBag().getShowOwnedItemsItem(),
+                        main.getYmlBag().getShowOwnedItemsItemDescription(symbol)));
             } else if(item.getType() == main.getYmlBag().getAutomaticSortItem()) {
                 if(isRightClick) {
                     jsonManager.updateSortConfig(player.getUniqueId());
-                    String symbol = jsonManager.getSortConfig(player.getUniqueId());
+                    String symbol = main.getYmlBag().getAutomaticSortOption(jsonManager.getSortConfig(player.getUniqueId()));
                     e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(),
                             main.getYmlBag().getAutomaticSortDescription(symbol)));
                 } else if(isLeftClick) {
@@ -102,6 +109,8 @@ public class InventoryClick implements Listener {
 
         } else if(title.equalsIgnoreCase("Blacklist")) {
             e.setCancelled(true);
+        } else if(title.equalsIgnoreCase(main.getYmlBag().getSpecialInventoryName())) {
+            if(item.getType() == main.getYmlBag().getBackButtonItem()) inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
         }
 
         // Items Inventory

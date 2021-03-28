@@ -1,5 +1,5 @@
 name: SurvivalBag
-version: 0.9-SNAPSHOT
+version: 1.0-SNAPSHOT
 main: fr.politicraft.bag.Main
 api-version: 1.13
 authors: [Eliteman]

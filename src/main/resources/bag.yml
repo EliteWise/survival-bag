@@ -28,9 +28,14 @@ automatic-sort-item: ENDER_CHEST
 
 automatic-sort-item-name: "&eTrie Automatique"
 
+automatic-sort-option:
+  all: "Inventaire"
+  hotbar-only: "Hotbar"
+  all-except-hotbar: "Inventaire sans la hotbar"
+
 automatic-sort-item-description:
   - "&7-----------"
-  - "&bHotbar: {symbol}"
+  - "&bOption: {symbol}"
   - "&7-----------"
   - "&aClic gauche: Exécuter."
   - "&bClic droit: Hotbar uniquement."
@@ -66,3 +71,29 @@ deposit-withdrawal-item-counter-slot: 13
 deposit-item-slot: 11
 
 withdrawal-item-slot: 15
+
+special-inventory-item: STRUCTURE_BLOCK
+
+special-inventory-item-slot: 6
+
+special-inventory-item-name: "&dAutres"
+
+special-inventory-item-description:
+  - ""
+
+special-inventory-name: "&dAutres Items"
+
+show-owned-items-item-name: "&eVisibilité"
+
+show-owned-items-symbol:
+  true: "&a✔"
+  false: "&c❌"
+
+show-owned-items-item-description:
+  - "&7-----------"
+  - "&bItems possédés uniquement: {symbol}"
+  - "&7-----------"
+
+show-owned-items-item-slot: 51
+
+show-owned-items-item: PINK_STAINED_GLASS_PANE

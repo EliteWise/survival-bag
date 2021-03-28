@@ -7,6 +7,7 @@ import fr.politicraft.bag.config.YmlPermission;
 import fr.politicraft.bag.data.JsonManager;
 import fr.politicraft.bag.listener.ChatAmount;
 import fr.politicraft.bag.listener.InventoryClick;
+import fr.politicraft.bag.listener.InventoryClose;
 import fr.politicraft.bag.listener.PlayerJoin;
 import fr.politicraft.bag.model.BagInventory;
 import fr.politicraft.bag.util.YmlFile;
@@ -45,6 +46,7 @@ public final class Main extends JavaPlugin {
         pluginManager.registerEvents(new ChatAmount(this), this);
         pluginManager.registerEvents(new InventoryClick(this), this);
         pluginManager.registerEvents(new PlayerJoin(this), this);
+        pluginManager.registerEvents(new InventoryClose(this), this);
     }
 
     @Override
