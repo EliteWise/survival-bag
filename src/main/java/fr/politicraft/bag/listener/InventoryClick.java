@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
@@ -47,38 +46,49 @@ public class InventoryClick implements Listener {
         boolean isRightClick = e.isRightClick();
         InventoryView view = player.getOpenInventory();
 
-        if(item == null || e.getClickedInventory() == view.getBottomInventory()) return;
+        if(item == null) return;
 
         FileConfiguration configCat = YamlConfiguration.loadConfiguration(new File(main.mainPath, YmlFile.CATEGORIES));
         String title = e.getView().getTitle();
 
         if(title.equalsIgnoreCase(main.getYmlBag().getInventoryMenuName())) {
             e.setCancelled(true);
+            if(e.getClickedInventory() == view.getBottomInventory()) return;
             if(item.getType() == main.getYmlBag().getExperienceItem()) {
-                inventoryManager.experience(player, item);
-                inventoryManager.amountInventory(player, jsonManager, item, true);
+                if(player.getEffectivePermissions().stream().anyMatch(perm -> perm.getPermission().contains("survivalbag.xp"))) {
+                    inventoryManager.experience(player, item);
+                    inventoryManager.amountInventory(player, jsonManager, item, true);
+                }
             } else if(item.getType() == main.getYmlBag().getFrameItem()) {
 
             } else if(item.getType() == main.getYmlBag().getSpecialItem()) {
-                inventoryManager.specialInventory(player);
+                if(player.getEffectivePermissions().stream().anyMatch(perm -> perm.getPermission().contains("survivalbag.items"))) {
+                    inventoryManager.specialInventory(player);
+                }
             } else if(item.getType() == main.getYmlBag().getShowOwnedItemsItem()) {
                 jsonManager.updateItemsVisibilityConfig(player.getUniqueId());
                 String symbol = main.getYmlBag().getShowOwnedItemsSymbol(jsonManager.getItemsOwnedVisibilityConfig(player.getUniqueId()));
                 e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getShowOwnedItemsItemName(), main.getYmlBag().getShowOwnedItemsItem(),
                         main.getYmlBag().getShowOwnedItemsItemDescription(symbol)));
             } else if(item.getType() == main.getYmlBag().getAutomaticSortItem()) {
-                if(isRightClick) {
-                    jsonManager.updateSortConfig(player.getUniqueId());
-                    String symbol = main.getYmlBag().getAutomaticSortOption(jsonManager.getSortConfig(player.getUniqueId()));
-                    e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(),
-                            main.getYmlBag().getAutomaticSortDescription(symbol)));
-                } else if(isLeftClick) {
-                    inventoryManager.sort(player, jsonManager);
+                if(player.getEffectivePermissions().stream().anyMatch(perm -> perm.getPermission().contains("survivalbag.items"))) {
+                    if(isRightClick) {
+                        jsonManager.updateSortConfig(player.getUniqueId());
+                        String symbol = main.getYmlBag().getAutomaticSortOption(jsonManager.getSortConfig(player.getUniqueId()));
+                        e.getClickedInventory().setItem(e.getSlot(), customItem.create(main.getYmlBag().getAutomaticSortItemName(), main.getYmlBag().getAutomaticSortItem(),
+                                main.getYmlBag().getAutomaticSortDescription(symbol)));
+                    } else if(isLeftClick) {
+                        inventoryManager.sort(player, jsonManager);
+                    }
                 }
             } else {
-                inventoryManager.itemsInventory(player, configCat, ymlMsg, item);
+                if(player.getEffectivePermissions().stream().anyMatch(perm -> perm.getPermission().contains("survivalbag.items"))) {
+                    inventoryManager.itemsInventory(player, configCat, ymlMsg, item);
+                }
             }
         } else if(title.equalsIgnoreCase(main.getYmlBag().getInventoryDepositWithdrawalName())) {
+            e.setCancelled(true);
+            if(e.getClickedInventory() == view.getBottomInventory()) return;
             if(item.getType() == main.getYmlBag().getBackButtonItem()) inventoryManager.backToPreviousInventory(player, "Category", configCat, ymlMsg, customItem.create(main.getBagInventory().getPreviousClickedItem().get(player).getType(), main.getBagInventory().getCategoryInventoryName().get(player)));
 
             String itemName = item.getItemMeta().getDisplayName();
@@ -93,6 +103,8 @@ public class InventoryClick implements Listener {
 
             // Experience inventory
         } else if(title.equalsIgnoreCase(main.getYmlBag().getInventoryExperienceName())) {
+            e.setCancelled(true);
+            if(e.getClickedInventory() == view.getBottomInventory()) return;
             if(item.getType() == main.getYmlBag().getBackButtonItem()) inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
 
             String itemName_ = item.getItemMeta().getDisplayName();
@@ -115,6 +127,8 @@ public class InventoryClick implements Listener {
 
         // Items Inventory
         if(title.equalsIgnoreCase(main.getBagInventory().getCategoryInventoryName().get(player))) {
+            e.setCancelled(true);
+            if(e.getClickedInventory() == view.getBottomInventory()) return;
             if (item.getType() == main.getYmlBag().getBackButtonItem()) {
                 inventoryManager.backToPreviousInventory(player, main.getYmlBag().getInventoryMenuName(), null, null, null);
             } else {
@@ -133,16 +147,6 @@ public class InventoryClick implements Listener {
                             main.getYmlBag().getItemsDescription(amount, symbol)));
                 }
             }
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryDragEvent e) {
-        InventoryView inventoryView = e.getView();
-        String title = inventoryView.getTitle();
-
-        if(title.equalsIgnoreCase(main.getYmlBag().getInventoryMenuName())) {
             e.setCancelled(true);
         }
     }

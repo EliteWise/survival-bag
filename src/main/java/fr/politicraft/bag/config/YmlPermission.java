@@ -21,6 +21,14 @@ public class YmlPermission {
         this.config = YamlConfiguration.loadConfiguration(new File(main.getDataFolder() + "/" + YmlFile.PERMISSIONS));
     }
 
+    public int getItemsDefaultValue() {
+        return config.getInt("items-access.default-value");
+    }
+
+    public int getXpDefaultValue() {
+        return config.getInt("xp-access.default-value");
+    }
+
     public boolean hasBagViewer(UUID playerUUID) {
         return config.getStringList(JsonField.BAG_VIEWER).contains(String.valueOf(UUIDModeEnabled() ? playerUUID : Bukkit.getOfflinePlayer(playerUUID).getName()));
     }

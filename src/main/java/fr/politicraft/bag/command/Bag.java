@@ -79,14 +79,17 @@ public class Bag implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = (Player) sender;
 
+        if(player.getEffectivePermissions().stream().noneMatch(perm -> perm.getPermission().contains("survivalbag"))) {
+            player.sendMessage(main.getYmlMsg().getPrefixMessage() + main.getYmlMsg().getPermissionErrorMessage());
+            return false;
+        }
+
         try {
             jsonManager.createPlayerFile(player);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if(args.length == 0) {
-
-            if(player.isPermissionSet("889")) Bukkit.broadcastMessage("§cJ'ai la perm");
 
             for(PermissionAttachmentInfo test : player.getEffectivePermissions()) {
                     Bukkit.broadcastMessage(test.getPermission());

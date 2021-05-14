@@ -67,7 +67,7 @@ public class JsonManager {
         return 0;
     }
 
-    public void addAllItems(UUID playerUUID, ItemStack[] items) throws IOException {
+    public void addAllItems(UUID playerUUID, ItemStack[] items, String itemsLimitNbr) throws IOException {
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
 
         // Update item
@@ -79,7 +79,6 @@ public class JsonManager {
                 Bukkit.getPlayer(playerUUID).getInventory().removeItem(item);
             }
         }
-
         // Write new value into json file
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
     }
@@ -302,6 +301,8 @@ public class JsonManager {
         specialInv.setContents(items);
         specialInv.addItem(itemStack);
 
+        Bukkit.getPlayer(playerUUID).getInventory().removeItem(itemStack);
+
         JsonNode root = mapper.readTree(new File(mainPath + playerUUID + ".json"));
         ((ObjectNode) root).put("specialItems", InventorySerializer.inventoryToBase64(specialInv));
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
@@ -346,6 +347,29 @@ public class JsonManager {
 
         ((ObjectNode) root.get(JsonField.CONFIG)).put(JsonField.CONFIG_OWNED_ITEMS_VISIBILITY, !getItemsOwnedVisibilityConfig(playerUUID));
         mapper.writeValue(new File(mainPath + playerUUID + ".json"), root);
+    }
+
+    public int summarizeSpecialStoredItems(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        ItemStack[] specialItems = InventorySerializer.itemStackArrayFromBase64(getSpecialInventory(playerUUID));
+        return Arrays.stream(specialItems).filter(Objects::nonNull).mapToInt(ItemStack::getAmount).sum();
+    }
+
+    public int summarizeStoredItems(UUID playerUUID) throws IOException {
+        UUID playerChecked = main.getBagInventory().getCheckedPlayer().get(playerUUID);
+        playerUUID = (playerChecked == null ? playerUUID : playerChecked);
+
+        JsonNode jsonNode = mapper.readTree(new File(mainPath + playerUUID + ".json")).get("items");
+        Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+        List<Integer> items = new ArrayList<>();
+
+        while(fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            items.add(field.getValue().intValue());
+        }
+        return (items.stream().mapToInt(Integer::intValue).sum() + summarizeSpecialStoredItems(playerUUID)) - 1;
     }
 
 }

@@ -77,9 +77,18 @@ public class ChatAmount implements Listener {
 
         if(bag.getDeposit().contains(playerName)) {
 
-            chatRequestManager.depositItems(chatPlayer, playerUUID, playerInv, previousClickedItem, amount, bag, jsonManager, ymlMsg);
-            reopenAmountInventory(chatPlayer, jsonManager, previousClickedItem, false);
+            String itemsLimitChar = chatPlayer.getEffectivePermissions().stream().filter(perm -> perm.getPermission().contains("survivalbag.items")).findFirst().get().getPermission();
+            String itemsLimitNbr = itemsLimitChar.replaceAll("[^0-9]", "");
 
+            if(itemsLimitNbr.isEmpty()) itemsLimitNbr = String.valueOf(main.getYmlPerm().getItemsDefaultValue());
+
+            if((jsonManager.summarizeStoredItems(playerUUID) + amount <= Integer.parseInt(itemsLimitNbr))) {
+                chatRequestManager.depositItems(chatPlayer, playerUUID, playerInv, previousClickedItem, amount, bag, jsonManager, ymlMsg);
+                reopenAmountInventory(chatPlayer, jsonManager, previousClickedItem, false);
+            } else {
+                chatPlayer.sendMessage(main.getYmlMsg().getItemsLimitExceededMessage());
+                chatRequestManager.depositItems(chatPlayer, playerUUID, playerInv, previousClickedItem, (Integer.parseInt(itemsLimitNbr) - jsonManager.getItemAmount(playerUUID, previousClickedItem.toString())), bag, jsonManager, ymlMsg);
+            }
         } else if(bag.getWithdrawal().contains(playerName)) {
 
             chatRequestManager.withdrawalItems(chatPlayer, playerUUID, playerInv, previousClickedItem, amount, bag, jsonManager, ymlMsg);
@@ -87,9 +96,18 @@ public class ChatAmount implements Listener {
 
         } else if(bag.getExpDeposit().contains(playerName)) {
 
-            chatRequestManager.depositExp(chatPlayer, playerUUID, amount, bag, jsonManager, ymlMsg);
-            reopenAmountInventory(chatPlayer, jsonManager, previousClickedItem, true);
+            String expLimitChar = chatPlayer.getEffectivePermissions().stream().filter(perm -> perm.getPermission().contains("survivalbag.xp")).findFirst().get().getPermission();
+            String expLimitNbr = expLimitChar.replaceAll("[^0-9]", "");
 
+            if(expLimitNbr.isEmpty()) expLimitNbr = String.valueOf(main.getYmlPerm().getXpDefaultValue());
+
+            if(jsonManager.getExperience(playerUUID) + amount <= Integer.parseInt(expLimitNbr)) {
+                chatRequestManager.depositExp(chatPlayer, playerUUID, amount, bag, jsonManager, ymlMsg);
+                reopenAmountInventory(chatPlayer, jsonManager, previousClickedItem, true);
+            } else {
+                chatPlayer.sendMessage(main.getYmlMsg().getXpLimitExceededMessage());
+                chatRequestManager.depositExp(chatPlayer, playerUUID, (Integer.parseInt(expLimitNbr) - jsonManager.getExperience(playerUUID)), bag, jsonManager, ymlMsg);
+            }
         } else if(bag.getExpWithdrawal().contains(playerName)) {
 
             chatRequestManager.withdrawalExp(chatPlayer, playerUUID, amount, bag, jsonManager, ymlMsg);

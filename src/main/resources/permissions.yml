@@ -1,7 +1,9 @@
-items-access: survivalbag.items
+items-access:
+  name: "survivalbag.items"
   default-value: 500
 
-xp-access: survivalbag.xp
+xp-access:
+  name: "survivalbag.xp"
   default-value: 500
 
 bags-viewer-access: survivalbag.bags-viewer

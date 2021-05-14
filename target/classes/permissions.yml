@@ -1,4 +1,9 @@
-uuid-mode: false
+items-access:
+  name: "survivalbag.items"
+  default-value: 500
 
-bag-viewer:
-  - Playername
+xp-access:
+  name: "survivalbag.xp"
+  default-value: 500
+
+bags-viewer-access: survivalbag.bags-viewer

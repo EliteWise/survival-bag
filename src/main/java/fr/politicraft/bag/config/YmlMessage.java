@@ -5,6 +5,7 @@ import fr.politicraft.bag.util.TextAdapter;
 import fr.politicraft.bag.util.YmlFile;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 
@@ -20,6 +21,10 @@ public class YmlMessage {
 
     public String getPrefixMessage() {
         return TextAdapter.colorize(config.getString("message-prefix"));
+    }
+
+    public void send(Player player, String message) {
+        player.sendMessage(getPrefixMessage() + message);
     }
 
     // Chat Items //
@@ -117,5 +122,21 @@ public class YmlMessage {
 
     public String getUnknownPlayerMessage() {
         return TextAdapter.colorize(config.getString("unknown-player"));
+    }
+
+    public String getPermissionErrorMessage() {
+        return TextAdapter.colorize(config.getString("permission-error"));
+    }
+
+    public String getItemsLimitExceededMessage() {
+        return TextAdapter.colorize(config.getString("items-limit-exceeded"));
+    }
+
+    public String getXpLimitExceededMessage() {
+        return TextAdapter.colorize(config.getString("xp-limit-exceeded"));
+    }
+
+    public String getSortedExtraItemsToRemoveMessage(int amount) {
+        return TextAdapter.replaceSection(TextAdapter.colorize(config.getString("sort-items-extra")), amount, null);
     }
 }

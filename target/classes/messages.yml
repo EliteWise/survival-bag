@@ -43,3 +43,11 @@ sort-summary-hover: "&b> Récap dans un inventaire <"
 unknown-player: "&cCe joueur ne s'est jamais connecté sur le serveur."
 
 time-write-amount: 5
+
+permission-error: "&cVous ne possédez pas la permission."
+
+items-limit-exceeded: "&cTu as atteint la limite d'items accessible avec ta permission."
+
+xp-limit-exceeded: "&cTu as atteint la limite d'xp accessible avec ta permission."
+
+sort-items-extra: "&cTu as dépassé la limite d'items accessible avec ta permission, tu dois retirer &7{amount} &citems de ton inventaire pour trier à nouveau."

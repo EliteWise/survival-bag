@@ -18,10 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -167,6 +164,10 @@ public class InventoryManager {
     public void sort(Player player, JsonManager jsonManager) throws IOException {
 
         UUID playerUUID = player.getUniqueId();
+        String itemsLimitChar = player.getEffectivePermissions().stream().filter(perm -> perm.getPermission().contains("survivalbag.items")).findFirst().get().getPermission();
+        String itemsLimitNbr = itemsLimitChar.replaceAll("[^0-9]", "");
+
+        if(itemsLimitNbr.isEmpty()) itemsLimitNbr = String.valueOf(main.getYmlPerm().getItemsDefaultValue());
 
         ItemStack[] playerInv = player.getInventory().getStorageContents();
         ItemStack[] hotbar = IntStream.range(0, 9).boxed().map(player.getInventory()::getItem).toArray(ItemStack[]::new);
@@ -175,18 +176,27 @@ public class InventoryManager {
         try {
             switch (jsonManager.getSortConfig(player.getUniqueId())) {
                 case "all":
+
+                    int amount = Arrays.stream(playerInv).filter(Objects::nonNull).map(ItemStack::getAmount).mapToInt(Integer::intValue).sum();
+                    int nbrItemsToRemove = (jsonManager.summarizeStoredItems(playerUUID) + amount) - Integer.parseInt(itemsLimitNbr);
+
+                    if(jsonManager.summarizeStoredItems(playerUUID) + amount > Integer.parseInt(itemsLimitNbr)) {
+                        player.sendMessage(main.getYmlMsg().getSortedExtraItemsToRemoveMessage(nbrItemsToRemove));
+                        return;
+                    }
+
                     filterSortSpecialItems(playerUUID, playerInv);
-                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(playerInv));
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(playerInv), itemsLimitNbr);
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), playerInv);
                     break;
                 case "hotbar-only":
                     filterSortSpecialItems(playerUUID, hotbar);
-                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(hotbar));
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(hotbar), itemsLimitNbr);
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), hotbar);
                     break;
                 case "all-except-hotbar":
                     filterSortSpecialItems(playerUUID, exceptHotbar);
-                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(exceptHotbar));
+                    jsonManager.addAllItems(player.getUniqueId(), substractItemsArray(exceptHotbar), itemsLimitNbr);
                     main.getBagInventory().getSummarySortedItems().put(player.getName(), exceptHotbar);
                     break;
             }
