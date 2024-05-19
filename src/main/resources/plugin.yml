@@ -1,0 +1,7 @@
+name: SurvivalBag
+version: ${project.version}
+main: fr.politicraft.bag.Main
+api-version: 1.13
+authors: [Eliteman]
+commands:
+  sac:
